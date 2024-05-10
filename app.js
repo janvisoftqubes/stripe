@@ -18,11 +18,10 @@ app.use(
       }
   })
 );
-app.use(bodyParser.json());
 
-app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
-
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 app.use((req, res, next) => {
   if (req.url.endsWith(".js")) {
     res.setHeader("Content-Type", "application/javascript");
