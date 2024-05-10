@@ -133,9 +133,10 @@ app.post("/webhook", bodyParser.json(), async (req, res) => {
         signature,
         endpointSecret
       );
-  } catch (err) {
-    console.error("Webhook error:", err);
-    return res.status(400).send(`Webhook Error: ${err.message}`);
+    } catch (err) {
+      console.error("Webhook error:", err);
+      return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
   }
 
   // Handle the event
@@ -169,6 +170,7 @@ app.post("/webhook", bodyParser.json(), async (req, res) => {
   // Return a response to acknowledge receipt of the event
   res.json({ received: true });
 });
+
 
 app.listen(port, () => {
   console.log(`Server is listening at http://localhost:${port}`);
