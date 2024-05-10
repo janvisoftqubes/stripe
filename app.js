@@ -11,7 +11,7 @@ require("text-encoding");
 const app = express();
 const port = 3000;
 
-app.use(bodyParser.json());
+app.use(express.raw({ type: "application/json" }));
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
@@ -120,14 +120,14 @@ app.get("/list-products", async (req, res) => {
   }
 });
 
-app.post("/webhook", express.raw({ type: "application/json" }), async (request, response) => {
+app.post("/webhook", async (request, response) => {
   let event = request.body;
-  
+
   const endpointSecret = "whsec_DydxF70pzUq2mdXMC5qUCwGIIpPWN2Je";
-  
+
   if (endpointSecret) {
     const signature = request.headers["stripe-signature"];
-    console.log("signature ::",signature);
+    console.log("signature ::", signature);
     try {
       event = stripe.webhooks.constructEvent(
         request.body,
@@ -171,7 +171,6 @@ app.post("/webhook", express.raw({ type: "application/json" }), async (request, 
   // Return a response to acknowledge receipt of the event
   response.json({ received: true });
 });
-
 
 app.listen(port, () => {
   console.log(`Server is listening at http://localhost:${port}`);
