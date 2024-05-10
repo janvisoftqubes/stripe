@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stripe Subscription Form</title>
+    <script src="https://js.stripe.com/v3/" ></script>
+</head>
+
+<body>
+    <h1>Stripe Subscription Form</h1>
+    <form id="subscription-form">
+        <div>
+            <label for="email">Email:</label>
+            <input type="email" id="email" required>
+        </div>
+        <div>
+            <label for="card-number">Card Number:</label>
+            <input type="text" id="card-number" required>
+        </div>
+        <div>
+            <label for="card-expiry">Card Expiry (MM/YYYY):</label>
+            <input type="text" id="card-expiry" placeholder="e.g., 12/2025" required>
+        </div>
+        <div>
+            <label for="card-cvc">CVC:</label>
+            <input type="text" id="card-cvc" required>
+        </div>
+        <button type="submit">Subscribe</button>
+    </form>
+
+    <script>
+        // JavaScript code for handling form submission and tokenization
+        document.getElementById('subscription-form').addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const cardNumber = document.getElementById('card-number').value;
+            const cardExpiry = document.getElementById('card-expiry').value;
+            const cardCVC = document.getElementById('card-cvc').value;
+
+
+
+
+            const stripe = Stripe('pk_test_51OoJ9LSASGjb3zqkIbuCwoFz3qsrXCzRHLaIQTwAlP2wf4axwKqsgRQzwBTOCpBcKd2Sidj5ZvQayJa7zp8kSLqu009pC4GBd2');
+            const elements = stripe.elements();
+
+            const cardElement = elements.create('card');
+            const { token, error } = await stripe.createToken(cardElement);
+
+            if (error) {
+                console.error('Error creating token:', error);
+            } else {
+                const tokenID = token.id;
+                console.log('Token ID:', tokenID);
+
+                // Make a POST request to your server with the token
+                fetch('http://localhost:3000/create-subscription', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        token: tokenID,
+                        priceId: 'price_1PE3CfSASGjb3zqkjpRKQVkc'
+                    })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Subscription created:', data);
+                    })
+                    .catch(error => {
+                        console.error('Error creating subscription:', error);
+                    });
+            }
+        });
+    </script>
+</body>
+
+</html>
