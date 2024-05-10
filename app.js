@@ -136,6 +136,7 @@ app.post("/webhook", express.raw({ type: "application/json" }), async (request, 
     const signature = request.headers["stripe-signature"];
     console.log("signature ::",signature);
     try {
+      console.log("request.body::",request.body)
       event = stripe.webhooks.constructEvent(
         request.body,
         signature,
