@@ -123,7 +123,7 @@ app.get("/list-products", async (req, res) => {
 app.post("/webhook", bodyParser.json(), async (req, res) => {
   let event = req.body;
   
-  const endpointSecret = "whsec_Z9LXG2ER6iMBpTRTcrprsOdUU4so9Tvj";
+  const endpointSecret = "whsec_DydxF70pzUq2mdXMC5qUCwGIIpPWN2Je";
   
   if (endpointSecret) {
     const signature = req.headers["stripe-signature"];
