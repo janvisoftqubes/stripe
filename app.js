@@ -120,7 +120,7 @@ app.get("/list-products", async (req, res) => {
   }
 });
 
-app.post("/webhook", bodyParser.json(), async (req, res) => {
+app.post("/webhook", bodyParser.raw({ type: "application/json" }), async (req, res) => {
   let event = req.body;
   
   const endpointSecret = "whsec_DydxF70pzUq2mdXMC5qUCwGIIpPWN2Je";
