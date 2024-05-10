@@ -7,7 +7,7 @@ const path = require("path");
 const stripe = require("stripe")(
   "sk_test_51OoJ9LSASGjb3zqkmfLag33XI9suJ9eiJbJ2jrVtVulMLk7TA0LQvOMPCDKdcZnV7ToLvxcGoew16XunAiXRmOJE00dSzWxDU7"
 );
-require('text-encoding');
+require("text-encoding");
 const app = express();
 const port = 3000;
 
@@ -120,54 +120,54 @@ app.get("/list-products", async (req, res) => {
   }
 });
 
+app.post("/webhook", bodyParser.json(), async (req, res) => {
+  const sig = req.headers["stripe-signature"];
+  const payload = req.body;
+  let event;
 
-app.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req, res) => {
-    const sig = req.headers['stripe-signature'];
-    const rawBody = req.body; // Access the raw request body
-    let event;
+  try {
+    event = stripe.webhooks.constructEvent(
+      JSON.stringify(payload),
+      sig,
+      "your_webhook_signing_secret"
+    );
+  } catch (err) {
+    console.error("Webhook error:", err);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
 
-    console.log(req.body)
+  // Handle the event
+  switch (event.type) {
+    case "payment_intent.succeeded":
+      // Handle successful payment intent
+      console.log("PaymentIntent succeeded:", event.data.object);
+      break;
+    case "payment_intent.requires_action":
+      // Handle payment intent requiring action (e.g., 3D Secure authentication)
+      console.log("PaymentIntent requires action:", event.data.object);
+      break;
+    case "customer.subscription.created":
+      // Handle subscription created event
+      console.log("Subscription created:", event.data.object);
+      break;
+    case "customer.subscription.updated":
+      // Handle subscription updated event
+      console.log("Subscription updated:", event.data.object);
+      // Check if the subscription status is "complete"
+      if (event.data.object.status === "complete") {
+        console.log("Subscription is complete!");
+        // Perform any additional actions you need
+      }
+      break;
+    default:
+      // Unexpected event type
+      console.log(`Unhandled event type: ${event.type}`);
+  }
 
-    try {
-        event = stripe.webhooks.constructEvent(rawBody, sig, 'your_webhook_signing_secret');
-    } catch (err) {
-        console.error('Webhook error:', err);
-        return res.status(400).send(`Webhook Error: ${err.message}`);
-    }
-
-    // Handle the event
-    switch (event.type) {
-        case 'payment_intent.succeeded':
-            // Handle successful payment intent
-            console.log('PaymentIntent succeeded:', event.data.object);
-            break;
-        case 'payment_intent.requires_action':
-            // Handle payment intent requiring action (e.g., 3D Secure authentication)
-            console.log('PaymentIntent requires action:', event.data.object);
-            break;
-        case 'customer.subscription.created':
-            // Handle subscription created event
-            console.log('Subscription created:', event.data.object);
-            break;
-        case 'customer.subscription.updated':
-            // Handle subscription updated event
-            console.log('Subscription updated:', event.data.object);
-            // Check if the subscription status is "complete"
-            if (event.data.object.status === 'complete') {
-                console.log('Subscription is complete!');
-                // Perform any additional actions you need
-            }
-            break;
-        default:
-            // Unexpected event type
-            console.log(`Unhandled event type: ${event.type}`);
-    }
-
-    // Return a response to acknowledge receipt of the event
-    res.json({ received: true });
+  // Return a response to acknowledge receipt of the event
+  res.json({ received: true });
 });
 
-  
 app.listen(port, () => {
   console.log(`Server is listening at http://localhost:${port}`);
 });
@@ -179,7 +179,7 @@ async function createPaymentMethod(cardDetails) {
       type: "card",
       card: {
         number: cardDetails.number,
-        exp_month:cardDetails.expMonth,
+        exp_month: cardDetails.expMonth,
         exp_year: cardDetails.expYear,
         cvc: cardDetails.cvc,
       },
