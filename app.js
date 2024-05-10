@@ -7,6 +7,7 @@ const path = require("path");
 const stripe = require("stripe")(
   "sk_test_51OoJ9LSASGjb3zqkmfLag33XI9suJ9eiJbJ2jrVtVulMLk7TA0LQvOMPCDKdcZnV7ToLvxcGoew16XunAiXRmOJE00dSzWxDU7"
 );
+require('text-encoding');
 const app = express();
 const port = 3000;
 
