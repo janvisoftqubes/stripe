@@ -121,15 +121,15 @@ app.get("/list-products", async (req, res) => {
 });
 
 app.post("/webhook", bodyParser.json(), async (req, res) => {
-  let event = request.body;
+  let event = req.body;
   
   const endpointSecret = "whsec_Z9LXG2ER6iMBpTRTcrprsOdUU4so9Tvj";
   
   if (endpointSecret) {
-    const signature = request.headers["stripe-signature"];
+    const signature = req.headers["stripe-signature"];
     try {
       event = stripe.webhooks.constructEvent(
-        request.body,
+        req.body,
         signature,
         endpointSecret
       );
