@@ -12,10 +12,11 @@ const app = express();
 const port = 3000;
 
 app.use(
-  bodyParser.json({
-      verify: function(req, res, buf) {
-          req.rawBody = buf;
-      }
+  bodyParser.raw({
+    type: "application/json",
+    verify: (req, res, buf) => {
+      req.rawBody = buf;
+    },
   })
 );
 app.use(bodyParser.json());
@@ -46,7 +47,7 @@ app.post("/create-product", async (req, res) => {
 });
 
 // Route to handle creating a subscription
-app.post("/create-subscription", async (req, res) => {
+app.post("/create-subscription", bodyParser.json(),async (req, res) => {
   try {
     // Tokenize the payment method details provided by the client
     const paymentMethod = await stripe.paymentMethods.create({
@@ -127,7 +128,7 @@ app.get("/list-products", async (req, res) => {
   }
 });
 
-app.post("/webhook", express.raw({ type: "application/json" }), async (request, response) => {
+app.post("/webhook", async (request, response) => {
   let event = request.body;
   
   const endpointSecret = "whsec_DydxF70pzUq2mdXMC5qUCwGIIpPWN2Je";
