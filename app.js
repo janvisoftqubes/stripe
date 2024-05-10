@@ -120,17 +120,17 @@ app.get("/list-products", async (req, res) => {
   }
 });
 
-app.post("/webhook", express.raw({ type: "application/json" }), async (req, res) => {
-  let event = req.body;
+app.post("/webhook", express.raw({ type: "application/json" }), async (request, response) => {
+  let event = request.body;
   
   const endpointSecret = "whsec_DydxF70pzUq2mdXMC5qUCwGIIpPWN2Je";
   
   if (endpointSecret) {
-    const signature = req.headers["stripe-signature"];
+    const signature = request.headers["stripe-signature"];
     console.log("signature ::",signature);
     try {
       event = stripe.webhooks.constructEvent(
-        req.body,
+        request.body,
         signature,
         endpointSecret
       );
@@ -169,7 +169,7 @@ app.post("/webhook", express.raw({ type: "application/json" }), async (req, res)
   }
 
   // Return a response to acknowledge receipt of the event
-  res.json({ received: true });
+  response.json({ received: true });
 });
 
 
