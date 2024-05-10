@@ -136,7 +136,7 @@ app.post("/webhook", express.raw({ type: "application/json" }), async (request, 
       );
     } catch (err) {
       console.error("Webhook error:", err);
-      return res.status(400).send(`Webhook Error: ${err.message}`);
+      return response.status(400).send(`Webhook Error: ${err.message}`);
     }
   }
 
