@@ -121,16 +121,18 @@ app.get("/list-products", async (req, res) => {
 });
 
 app.post("/webhook", bodyParser.json(), async (req, res) => {
-  const sig = req.headers["stripe-signature"];
-  const payload = req.body;
-  let event;
-
-  try {
-    event = stripe.webhooks.constructEvent(
-      JSON.stringify(payload),
-      sig,
-      "your_webhook_signing_secret"
-    );
+  let event = request.body;
+  
+  const endpointSecret = "whsec_Z9LXG2ER6iMBpTRTcrprsOdUU4so9Tvj";
+  
+  if (endpointSecret) {
+    const signature = request.headers["stripe-signature"];
+    try {
+      event = stripe.webhooks.constructEvent(
+        request.body,
+        signature,
+        endpointSecret
+      );
   } catch (err) {
     console.error("Webhook error:", err);
     return res.status(400).send(`Webhook Error: ${err.message}`);
