@@ -13,9 +13,9 @@ const port = 3000;
 
 app.use(
   bodyParser.json({
-      verify: function(req, res, buf) {
-          req.rawBody = buf;
-      }
+    verify: function (req, res, buf) {
+      req.rawBody = buf;
+    },
   })
 );
 
@@ -126,59 +126,63 @@ app.get("/list-products", async (req, res) => {
   }
 });
 
-app.post("/webhook", express.raw({ type: "application/json" }), async (request, response) => {
-  let event = request.body;
-  
-  const endpointSecret = "whsec_DydxF70pzUq2mdXMC5qUCwGIIpPWN2Je";
-  
-  if (endpointSecret) {
-    const signature = request.headers["stripe-signature"];
-    console.log("signature ::",signature);
-    try {
-      console.log("request.body::",request.body)
-      event = stripe.webhooks.constructEvent(
-        request.body,
-        signature,
-        endpointSecret
-      );
-    } catch (err) {
-      console.error("Webhook error:", err);
-      return response.status(400).send(`Webhook Error: ${err.message}`);
-    }
-  }
+app.post(
+  "/webhook",
+  express.raw({ type: "application/json" }),
+  async (request, response) => {
+    let event;
+    const rawBody = request.rawBody;
 
-  // Handle the event
-  switch (event.type) {
-    case "payment_intent.succeeded":
-      // Handle successful payment intent
-      console.log("PaymentIntent succeeded:", event.data.object);
-      break;
-    case "payment_intent.requires_action":
-      // Handle payment intent requiring action (e.g., 3D Secure authentication)
-      console.log("PaymentIntent requires action:", event.data.object);
-      break;
-    case "customer.subscription.created":
-      // Handle subscription created event
-      console.log("Subscription created:", event.data.object);
-      break;
-    case "customer.subscription.updated":
-      // Handle subscription updated event
-      console.log("Subscription updated:", event.data.object);
-      // Check if the subscription status is "complete"
-      if (event.data.object.status === "complete") {
-        console.log("Subscription is complete!");
-        // Perform any additional actions you need
+    const endpointSecret = "whsec_DydxF70pzUq2mdXMC5qUCwGIIpPWN2Je";
+
+    if (endpointSecret) {
+      const signature = request.headers["stripe-signature"];
+      console.log("signature ::", signature);
+      try {
+        console.log("request.body::", request.rawBody);
+        event = stripe.webhooks.constructEvent(
+          rawBody,
+          signature,
+          endpointSecret
+        );
+      } catch (err) {
+        console.error("Webhook error:", err);
+        return response.status(400).send(`Webhook Error: ${err.message}`);
       }
-      break;
-    default:
-      // Unexpected event type
-      console.log(`Unhandled event type: ${event.type}`);
+    }
+
+    // Handle the event
+    switch (event.type) {
+      case "payment_intent.succeeded":
+        // Handle successful payment intent
+        console.log("PaymentIntent succeeded:", event.data.object);
+        break;
+      case "payment_intent.requires_action":
+        // Handle payment intent requiring action (e.g., 3D Secure authentication)
+        console.log("PaymentIntent requires action:", event.data.object);
+        break;
+      case "customer.subscription.created":
+        // Handle subscription created event
+        console.log("Subscription created:", event.data.object);
+        break;
+      case "customer.subscription.updated":
+        // Handle subscription updated event
+        console.log("Subscription updated:", event.data.object);
+        // Check if the subscription status is "complete"
+        if (event.data.object.status === "complete") {
+          console.log("Subscription is complete!");
+          // Perform any additional actions you need
+        }
+        break;
+      default:
+        // Unexpected event type
+        console.log(`Unhandled event type: ${event.type}`);
+    }
+
+    // Return a response to acknowledge receipt of the event
+    response.json({ received: true });
   }
-
-  // Return a response to acknowledge receipt of the event
-  response.json({ received: true });
-});
-
+);
 
 app.listen(port, () => {
   console.log(`Server is listening at http://localhost:${port}`);
