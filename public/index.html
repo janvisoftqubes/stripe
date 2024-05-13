@@ -1,112 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Stripe Subscription Form</title>
-    <script src="https://js.stripe.com/v3/"></script>
-  </head>
-
-  <body>
-    <h1>Stripe Subscription Form</h1>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription Form</title>
+</head>
+<body>
     <form id="subscription-form">
-      <div>
-        <label for="email">Email:</label>
-        <input type="email" id="email" required />
-      </div>
-      <div id="card-element-container">
-        <!-- Card Element will be mounted here -->
-      </div>
-      <div>
-        <label for="card-expiry">Card Expiry (MM/YYYY):</label>
-        <input
-          type="text"
-          id="card-expiry"
-          placeholder="e.g., 12/2025"
-          required
-        />
-      </div>
-      <div>
-        <label for="card-cvc">CVC:</label>
-        <input type="text" id="card-cvc" required />
-      </div>
-      <button type="submit">Subscribe</button>
+        <input type="email" id="email" placeholder="Enter your email">
+        <input type="text" id="card-number" placeholder="Card Number">
+        <input type="text" id="expiry" placeholder="Expiry (MM/YY)">
+        <input type="text" id="cvc" placeholder="CVC">
+        <button type="submit">Subscribe</button>
     </form>
-    <!-- <button id="checkout-button">Checkout</button> -->
 
     <script>
-      // JavaScript code for handling form submission and tokenization
-      document.addEventListener("DOMContentLoaded", function () {
-        const stripe = Stripe(
-          "pk_test_51OoJ9LSASGjb3zqkIbuCwoFz3qsrXCzRHLaIQTwAlP2wf4axwKqsgRQzwBTOCpBcKd2Sidj5ZvQayJa7zp8kSLqu009pC4GBd2"
-        );
-        const elements = stripe.elements();
-
-        const cardElement = elements.create("card");
-
-        document
-          .getElementById("subscription-form")
-          .addEventListener("submit", async function (event) {
+        document.getElementById('subscription-form').addEventListener('submit', async (event) => {
             event.preventDefault();
+            const email = document.getElementById('email').value;
+            const cardNumber = document.getElementById('card-number').value;
+            const expiry = document.getElementById('expiry').value;
+            const cvc = document.getElementById('cvc').value;
 
-            const email = document.getElementById("email").value;
-
-            // Create a token from the card Element
-            const { token, error } = await stripe.createToken(cardElement);
-
-            if (error) {
-              console.error("Error creating token:", error);
-            } else {
-              const tokenID = token.id;
-              console.log("Token ID:", tokenID);
-
-              // Make a POST request to your server with the token
-              fetch("https://stripe-2.onrender.com/create-subscription", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  email: email,
-                  token: tokenID,
-                  priceId: "price_1PE3CfSASGjb3zqkjpRKQVkc",
-                }),
-              })
-                .then((response) => response.json())
-                .then((data) => {
-                  console.log("Subscription created-------->:", data);
-                  createCheckoutSession(data.priceId);
-                })
-                .catch((error) => {
-                  console.error("Error creating subscription:", error);
+            try {
+                const customerResponse = await fetch('/api/create-customer', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email: email })
                 });
+                const customer = await customerResponse.json();
+
+                const paymentMethodResponse = await fetch('/api/create-payment-method', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        paymentMethodType: 'card',
+                        paymentMethodDetails: {
+                            number: cardNumber,
+                            exp_month: expiry.split('/')[0],
+                            exp_year: expiry.split('/')[1],
+                            cvc: cvc
+                        }
+                    })
+                });
+                const paymentMethod = await paymentMethodResponse.json();
+
+                await fetch('/api/attach-payment-method', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        paymentMethodId: paymentMethod.id,
+                        customerId: customer.id
+                    })
+                });
+
+                const sessionResponse = await fetch('/api/create-checkout-session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        customerId: customer.id,
+                        priceId: 'price_1PE3CfSASGjb3zqkjpRKQVkc',
+                        successUrl: 'https://stripe-2.onrender.com/success.html',
+                        cancelUrl: 'https://stripe-2.onrender.com/cancel.html'
+                    })
+                });
+                const session = await sessionResponse.json();
+
+                // Redirect the user to the checkout page
+                window.location.href = session.url;
+            } catch (error) {
+                console.error('Subscription error:', error);
             }
-          });
-
-        // Mount the card Element to the card-element-container
-        cardElement.mount("#card-element-container");
-
-        function createCheckoutSession(priceId) {
-          fetch("https://stripe-2.onrender.com/create-checkout-session", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              priceId: priceId,
-            }),
-          })
-            .then((response) => response.json())
-            .then((data) => {
-              console.log("Checkout session created:", data);
-              // Optionally, handle success response here
-            })
-            .catch((error) => {
-              console.error("Error creating checkout session:", error);
-              // Optionally, handle error response here
-            });
-        }
-      });
+        });
     </script>
-  </body>
+</body>
 </html>
