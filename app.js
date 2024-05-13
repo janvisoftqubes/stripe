@@ -164,6 +164,12 @@ app.post(
       case "customer.subscription.created":
         // Handle subscription created event
         console.log("Subscription created:", event.data.object);
+        try {
+          const subscription = await retrieveSubscription(event.data.object.subscription);
+          console.log('Retrieved subscription details:', subscription);
+        } catch (error) {
+          console.error('Error retrieving subscription details:', error);
+        }
         break;
         case "invoice.payment_succeeded":
         // Handle invoice payment succeeded event
@@ -177,12 +183,7 @@ app.post(
           }
         }
 
-        try {
-          const subscription = await retrieveSubscription(event.data.object.subscription);
-          console.log('Retrieved subscription details:', subscription);
-        } catch (error) {
-          console.error('Error retrieving subscription details:', error);
-        }
+       
         break;
       case "customer.subscription.updated":
         // Handle subscription updated event
