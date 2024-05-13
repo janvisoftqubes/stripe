@@ -275,7 +275,24 @@ const bodyParser = require("body-parser");
 const app = express();
 const port = 3000;
 
-app.use(bodyParser.json());
+app.use(
+  bodyParser.json({
+    verify: function (req, res, buf) {
+      req.rawBody = buf;
+    },
+  })
+);
+
+app.use(express.static(path.join(__dirname, "public")));
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use((req, res, next) => {
+  if (req.url.endsWith(".js")) {
+    res.setHeader("Content-Type", "application/javascript");
+  }
+  next();
+});
+
 
 // Endpoint to handle webhook events from Stripe
 app.post(
