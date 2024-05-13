@@ -28,7 +28,7 @@
         </div>
         <button type="submit">Subscribe</button>
     </form>
-    <button id="checkout-button">Checkout</button>
+    <!-- <button id="checkout-button">Checkout</button> -->
 
     <script>
         // JavaScript code for handling form submission and tokenization
@@ -80,40 +80,40 @@
 
 
 
-        document.getElementById('checkout-button').addEventListener('click', function () {
-            const stripe = Stripe('pk_test_51OoJ9LSASGjb3zqkIbuCwoFz3qsrXCzRHLaIQTwAlP2wf4axwKqsgRQzwBTOCpBcKd2Sidj5ZvQayJa7zp8kSLqu009pC4GBd2');
+        // document.getElementById('checkout-button').addEventListener('click', function () {
+        //     const stripe = Stripe('pk_test_51OoJ9LSASGjb3zqkIbuCwoFz3qsrXCzRHLaIQTwAlP2wf4axwKqsgRQzwBTOCpBcKd2Sidj5ZvQayJa7zp8kSLqu009pC4GBd2');
 
-            fetch('/create-payment-intent', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ amount: 1000, currency: 'usd' }) // Amount in cents
-            })
-                .then(function (response) {
-                    return response.json();
-                })
-                .then(function (data) {
-                    if (data.client_secret) {
-                        // If 3D Secure authentication is required, handle the client secret
-                        stripe.handleCardAction(data.client_secret)
-                            .then(function (result) {
-                                if (result.error) {
-                                    console.error(result.error.message);
-                                } else {
-                                    // Payment succeeded, handle success
-                                    console.log(result.paymentIntent);
-                                }
-                            });
-                    } else {
-                        // If no action is required, proceed with payment confirmation
-                        console.log("No action required. Proceeding with payment confirmation.");
-                    }
-                })
-                .catch(function (error) {
-                    console.error('Error:', error);
-                });
-        });
+        //     fetch('/create-payment-intent', {
+        //         method: 'POST',
+        //         headers: {
+        //             'Content-Type': 'application/json'
+        //         },
+        //         body: JSON.stringify({ amount: 1000, currency: 'usd' }) // Amount in cents
+        //     })
+        //         .then(function (response) {
+        //             return response.json();
+        //         })
+        //         .then(function (data) {
+        //             if (data.client_secret) {
+        //                 // If 3D Secure authentication is required, handle the client secret
+        //                 stripe.handleCardAction(data.client_secret)
+        //                     .then(function (result) {
+        //                         if (result.error) {
+        //                             console.error(result.error.message);
+        //                         } else {
+        //                             // Payment succeeded, handle success
+        //                             console.log(result.paymentIntent);
+        //                         }
+        //                     });
+        //             } else {
+        //                 // If no action is required, proceed with payment confirmation
+        //                 console.log("No action required. Proceeding with payment confirmation.");
+        //             }
+        //         })
+        //         .catch(function (error) {
+        //             console.error('Error:', error);
+        //         });
+        // });
     </script>
 </body>
 

@@ -79,7 +79,7 @@ app.post("/create-subscription", async (req, res) => {
       default_payment_method: paymentMethod.id,
     });
 
-    console.log("Subscription created:", subscription);
+    console.log("Subscription created:--->", subscription);
 
     res.json(subscription);
   } catch (error) {
