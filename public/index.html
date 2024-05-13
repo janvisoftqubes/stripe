@@ -74,7 +74,7 @@
               })
                 .then((response) => response.json())
                 .then((data) => {
-                  console.log("Subscription created:", data);
+                  console.log("Subscription created-------->:", data);
                   createCheckoutSession(data.priceId);
                 })
                 .catch((error) => {
