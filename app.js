@@ -165,6 +165,18 @@ app.post(
         // Handle subscription created event
         console.log("Subscription created:", event.data.object);
         break;
+        case "invoice.payment_succeeded":
+        // Handle invoice payment succeeded event
+        console.log("Invoice payment succeeded:", event.data.object);
+        // Check if the invoice payment is for a subscription
+        if (event.data.object.subscription) {
+          // Check if the subscription's status is "complete"
+          if (event.data.object.subscription.status === "complete") {
+            console.log("Subscription payment is complete!");
+            // Perform any additional actions you need
+          }
+        }
+        break;
       case "customer.subscription.updated":
         // Handle subscription updated event
         console.log("Subscription updated:", event.data.object);
