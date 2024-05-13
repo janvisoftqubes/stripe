@@ -165,7 +165,7 @@ app.post(
         // Handle subscription created event
         console.log("Subscription created:", event.data.object);
         try {
-          const subscription = await retrieveSubscription(event.data.object.subscription);
+          const subscription = await retrieveSubscription(event.data.object.id);
           console.log('Retrieved subscription details:', subscription);
         } catch (error) {
           console.error('Error retrieving subscription details:', error);
