@@ -154,47 +154,6 @@ app.post(
 
     // Handle the event
     switch (event.type) {
-      case "customer.subscription.created":
-        // Handle subscription created event
-        console.log("Subscription created:", event.data.object);
-        try {
-          const subscription = await retrieveSubscription(event.data.object.id);
-          console.log("Retrieved subscription details:", subscription);
-          // Check if the subscription status is "incomplete"
-          if (subscription.status === "incomplete") {
-            // Update the subscription status to "active"
-            await stripe.subscriptions.update(subscription.id, {
-              status: "active",
-            });
-            console.log("Subscription status updated to active.");
-          }
-        } catch (error) {
-          console.error("Error retrieving subscription details:", error);
-        }
-        break;
-      case "invoice.payment_succeeded":
-        // Handle invoice payment succeeded event
-        console.log("Invoice payment succeeded:", event.data.object);
-        // Check if the invoice payment is for a subscription
-        if (event.data.object.subscription) {
-          // Retrieve the subscription details
-          const subscriptionId = event.data.object.id;
-          try {
-            const subscription = await retrieveSubscription(subscriptionId);
-            console.log("Retrieved subscription details:", subscription);
-            // Check if the subscription's status is "incomplete"
-            if (subscription.status === "incomplete") {
-              // Update the subscription status to "active"
-              await stripe.subscriptions.update(subscription.id, {
-                status: "active",
-              });
-              console.log("Subscription status updated to active.");
-            }
-          } catch (error) {
-            console.error("Error retrieving subscription details:", error);
-          }
-        }
-        break;
       case "payment_intent.succeeded":
         // Handle successful payment intent
         console.log("PaymentIntent succeeded:", event.data.object);
@@ -202,6 +161,30 @@ app.post(
       case "payment_intent.requires_action":
         // Handle payment intent requiring action (e.g., 3D Secure authentication)
         console.log("PaymentIntent requires action:", event.data.object);
+        break;
+      case "customer.subscription.created":
+        // Handle subscription created event
+        console.log("Subscription created:", event.data.object);
+        try {
+          const subscription = await retrieveSubscription(event.data.object.id);
+          console.log('Retrieved subscription details:', subscription);
+        } catch (error) {
+          console.error('Error retrieving subscription details:', error);
+        }
+        break;
+        case "invoice.payment_succeeded":
+        // Handle invoice payment succeeded event
+        console.log("Invoice payment succeeded:", event.data.object);
+        // Check if the invoice payment is for a subscription
+        if (event.data.object.subscription) {
+          // Check if the subscription's status is "complete"
+          if (event.data.object.subscription.status === "complete") {
+            console.log("Subscription payment is complete!");
+            // Perform any additional actions you need
+          }
+        }
+
+       
         break;
       case "customer.subscription.updated":
         // Handle subscription updated event
@@ -226,13 +209,15 @@ app.listen(port, () => {
   console.log(`Server is listening at http://localhost:${port}`);
 });
 
+
+
 async function retrieveSubscription(subscriptionId) {
   try {
     const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-    console.log("Subscription details:", subscription);
+    console.log('Subscription details:', subscription);
     return subscription;
   } catch (error) {
-    console.error("Error retrieving subscription:", error);
+    console.error('Error retrieving subscription:', error);
     throw error;
   }
 }
