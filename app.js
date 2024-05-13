@@ -161,6 +161,11 @@ app.post(
       case "payment_intent.requires_action":
         // Handle payment intent requiring action (e.g., 3D Secure authentication)
         console.log("PaymentIntent requires action:", event.data.object);
+        const paymentIntent = event.data.object;
+        // Retrieve the client secret from the PaymentIntent
+        const clientSecret = paymentIntent.client_secret;
+        // Respond to the client with the client secret
+        response.json({ client_secret: clientSecret });
         break;
       case "customer.subscription.created":
         // Handle subscription created event
@@ -204,6 +209,22 @@ app.post(
     response.json({ received: true });
   }
 );
+
+app.post("/create-payment-intent", async (req, res) => {
+  try {
+      const paymentIntent = await stripe.paymentIntents.create({
+          amount: req.body.amount,
+          currency: req.body.currency,
+          payment_method_types: ['card'],
+          // Set to true to enable 3D Secure authentication
+          use_stripe_sdk: true,
+      });
+      res.json({ client_secret: paymentIntent.client_secret });
+  } catch (error) {
+      console.error("Error creating PaymentIntent:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 
 app.listen(port, () => {
   console.log(`Server is listening at http://localhost:${port}`);
