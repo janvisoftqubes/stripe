@@ -158,15 +158,7 @@ app.post(
         // Handle successful payment intent
         console.log("PaymentIntent succeeded:", event.data.object);
         break;
-      case "payment_intent.requires_action":
-        // Handle payment intent requiring action (e.g., 3D Secure authentication)
-        console.log("PaymentIntent requires action:", event.data.object);
-        const paymentIntent = event.data.object;
-        // Retrieve the client secret from the PaymentIntent
-        const clientSecret = paymentIntent.client_secret;
-        // Respond to the client with the client secret
-        response.json({ client_secret: clientSecret });
-        break;
+    
       case "customer.subscription.created":
         // Handle subscription created event
         console.log("Subscription created:", event.data.object);
@@ -177,6 +169,15 @@ app.post(
           console.error('Error retrieving subscription details:', error);
         }
         break;
+        case "payment_intent.requires_action":
+          // Handle payment intent requiring action (e.g., 3D Secure authentication)
+          console.log("PaymentIntent requires action:", event.data.object);
+          const paymentIntent = event.data.object;
+          // Retrieve the client secret from the PaymentIntent
+          const clientSecret = paymentIntent.client_secret;
+          // Respond to the client with the client secret
+          response.json({ client_secret: clientSecret });
+          break;
         case "invoice.payment_succeeded":
         // Handle invoice payment succeeded event
         console.log("Invoice payment succeeded:", event.data.object);
