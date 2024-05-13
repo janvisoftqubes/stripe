@@ -211,18 +211,23 @@ app.post(
   }
 );
 
-app.post("/create-payment-intent", async (req, res) => {
+app.post("/create-checkout-session", async (req, res) => {
   try {
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: req.body.amount,
-      currency: req.body.currency,
-      payment_method_types: ["card"],
-      // Set to true to enable 3D Secure authentication
-      use_stripe_sdk: true,
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [{
+        price: req.body.priceId,
+        quantity: 1,
+      }],
+      mode: 'payment',
+      success_url: 'https://stripe-2.onrender.com/success.html',
+      cancel_url: 'https://stripe-2.onrender.com/cancel.html',
     });
-    res.json({ client_secret: paymentIntent.client_secret });
+
+
+    res.redirect(session.url);
   } catch (error) {
-    console.error("Error creating PaymentIntent:", error);
+    console.error("Error creating checkout session:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });

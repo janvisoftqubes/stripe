@@ -61,6 +61,7 @@
                     .then(data => {
                         console.log('Subscription created:', data);
                         // Optionally, handle success response here
+                        createCheckoutSession(data.priceId);
                     })
                     .catch(error => {
                         console.error('Error creating subscription:', error);
@@ -70,6 +71,27 @@
             });
 
             cardElement.mount('#card-element-container');
+
+            function createCheckoutSession(priceId) {
+                fetch('https://stripe-2.onrender.com/create-checkout-session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        priceId: priceId
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Checkout session created:', data);
+                    // Optionally, handle success response here
+                })
+                .catch(error => {
+                    console.error('Error creating checkout session:', error);
+                    // Optionally, handle error response here
+                });
+            }
         });
     </script>
 </body>
