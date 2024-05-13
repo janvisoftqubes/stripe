@@ -178,7 +178,7 @@ app.post(
         // Check if the invoice payment is for a subscription
         if (event.data.object.subscription) {
           // Retrieve the subscription details
-          const subscriptionId = event.data.object.subscription;
+          const subscriptionId = event.data.object.id;
           try {
             const subscription = await retrieveSubscription(subscriptionId);
             console.log("Retrieved subscription details:", subscription);
