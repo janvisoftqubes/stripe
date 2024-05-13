@@ -375,7 +375,7 @@ app.post("/api/create-payment-method", async (req, res) => {
 // Attach Payment Method to Customer API endpoint
 app.post("/api/attach-payment-method", async (req, res) => {
   const { paymentMethodId, customerId } = req.body;
-
+console.log("req.body==>",req.body)
   try {
     await stripe.paymentMethods.attach(paymentMethodId, {
       customer: customerId,
