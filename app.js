@@ -216,19 +216,19 @@ app.post("/create-checkout-session", async (req, res) => {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [{
-        price: req.body.priceId,
+        price: req.body.priceId, // Use the price ID provided in the request
         quantity: 1,
       }],
       mode: 'payment',
       success_url: 'https://stripe-2.onrender.com/success.html',
       cancel_url: 'https://stripe-2.onrender.com/cancel.html',
     });
-
-
+    // If the session creation is successful, redirect to success URL
     res.redirect(session.url);
   } catch (error) {
-    console.log("Error creating checkout session:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error("Error creating checkout session:", error);
+    // If there's an error, redirect to cancel URL
+    res.redirect('https://stripe-2.onrender.com/cancel.html');
   }
 });
 
