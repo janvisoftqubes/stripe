@@ -411,20 +411,35 @@ app.post("/api/create-checkout-session", async (req, res) => {
   const { customerId, priceId, successUrl, cancelUrl } = req.body;
 
   try {
-    const session = await stripe.checkout.sessions.create({
-      customer: customerId,
-      payment_method_types: ["card"],
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
-      mode: "subscription",
-      success_url: successUrl,
-      cancel_url: cancelUrl,
-    });
-    res.json(session);
+    const customer = await stripe.customers.retrieve(customerId);
+    const hasPaymentMethod =
+      customer.invoice_settings.default_payment_method !== null;
+
+    if (hasPaymentMethod) {
+      // If the customer has a payment method attached, create a subscription
+      const subscription = await stripe.subscriptions.create({
+        customer: customerId,
+        items: [{ price: priceId }],
+        default_payment_method:
+          customer.invoice_settings.default_payment_method,
+      });
+      res.json(subscription);
+    } else {
+      const session = await stripe.checkout.sessions.create({
+        customer: customerId,
+        payment_method_types: ["card"],
+        line_items: [
+          {
+            price: priceId,
+            quantity: 1,
+          },
+        ],
+        mode: "subscription",
+        success_url: successUrl,
+        cancel_url: cancelUrl,
+      });
+      res.json(session);
+    }
   } catch (error) {
     console.error("Error creating checkout session:", error);
     res.status(500).json({ error: "Failed to create checkout session" });
