@@ -76,6 +76,7 @@ app.post("/create-subscription", async (req, res) => {
       customer: customer.id,
       items: [{ price: req.body.priceId }],
       expand: ["latest_invoice.payment_intent"],
+      default_payment_method: paymentMethod.id,
     });
 
     console.log("Subscription created:", subscription);
