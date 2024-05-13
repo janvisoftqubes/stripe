@@ -268,12 +268,17 @@
 // }
 
 //--->
-const stripe = require("stripe")("your_stripe_secret_key");
+// const stripe = require("stripe")("your_stripe_secret_key");
 const express = require("express");
 const bodyParser = require("body-parser");
 
 const app = express();
 const port = 3000;
+const path = require("path");
+const stripe = require("stripe")(
+  "sk_test_51OoJ9LSASGjb3zqkmfLag33XI9suJ9eiJbJ2jrVtVulMLk7TA0LQvOMPCDKdcZnV7ToLvxcGoew16XunAiXRmOJE00dSzWxDU7"
+);
+require("text-encoding");
 
 app.use(
   bodyParser.json({
@@ -292,7 +297,6 @@ app.use((req, res, next) => {
   }
   next();
 });
-
 
 // Endpoint to handle webhook events from Stripe
 app.post(
