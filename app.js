@@ -176,6 +176,13 @@ app.post(
             // Perform any additional actions you need
           }
         }
+
+        try {
+          const subscription = await retrieveSubscription(event.data.object.subscription);
+          console.log('Retrieved subscription details:', subscription);
+        } catch (error) {
+          console.error('Error retrieving subscription details:', error);
+        }
         break;
       case "customer.subscription.updated":
         // Handle subscription updated event
@@ -200,6 +207,18 @@ app.listen(port, () => {
   console.log(`Server is listening at http://localhost:${port}`);
 });
 
+
+
+async function retrieveSubscription(subscriptionId) {
+  try {
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+    console.log('Subscription details:', subscription);
+    return subscription;
+  } catch (error) {
+    console.error('Error retrieving subscription:', error);
+    throw error;
+  }
+}
 async function createPaymentMethod(cardDetails) {
   try {
     // Create a new payment method object and tokenize the payment method details
