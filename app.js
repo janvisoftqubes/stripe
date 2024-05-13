@@ -154,6 +154,18 @@ app.post(
 
     // Handle the event
     switch (event.type) {
+      case "invoice.payment_succeeded":
+      // Handle invoice payment succeeded event
+      console.log("Invoice payment succeeded:", event.data.object);
+      // Check if the invoice payment is for a subscription
+      if (event.data.object.subscription) {
+        // Update the subscription status to "active"
+        await stripe.subscriptions.update(event.data.object.subscription, {
+          status: "active",
+        });
+        console.log("Subscription status updated to active.");
+      }
+      break;
       case "payment_intent.succeeded":
         // Handle successful payment intent
         console.log("PaymentIntent succeeded:", event.data.object);
