@@ -185,7 +185,7 @@ app.post(
             // Check if the subscription's status is "incomplete"
             if (subscription.status === "incomplete") {
               // Update the subscription status to "active"
-              await stripe.subscriptions.update(subscriptionId, {
+              await stripe.subscriptions.update(subscription.id, {
                 status: "active",
               });
               console.log("Subscription status updated to active.");
