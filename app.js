@@ -207,7 +207,7 @@ app.post(
     }
 
     // Return a response to acknowledge receipt of the event
-    //  return response.json({ received: true });
+     return response.json({ received: true });
   }
 );
 
@@ -227,7 +227,7 @@ app.post("/create-checkout-session", async (req, res) => {
 
     res.redirect(session.url);
   } catch (error) {
-    console.error("Error creating checkout session:", error);
+    console.log("Error creating checkout session:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
