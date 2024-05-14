@@ -371,7 +371,7 @@ app.post("/api/create-payment-method", async (req, res) => {
     console.log("paymentMethod-->",paymentMethod)
     res.json(paymentMethod);
   } catch (error) {
-    console.error("Error creating payment method:", error);
+    console.log("Error creating payment method:", error);
     res.status(500).json({ error: "Failed to create payment method" });
   }
 });
