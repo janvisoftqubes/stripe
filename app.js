@@ -367,6 +367,8 @@ app.post("/api/create-payment-method", async (req, res) => {
         token: paymentMethodToken, // Use the test token provided by Stripe
       },
     });
+
+    console.log("paymentMethod-->",paymentMethod)
     res.json(paymentMethod);
   } catch (error) {
     console.error("Error creating payment method:", error);
