@@ -358,12 +358,14 @@ app.post("/api/create-customer", async (req, res) => {
 
 // Create Payment Method API endpoint
 app.post("/api/create-payment-method", async (req, res) => {
-  const { paymentMethodType, paymentMethodDetails } = req.body;
+  const { paymentMethodType, paymentMethodToken } = req.body;
 
   try {
     const paymentMethod = await stripe.paymentMethods.create({
       type: paymentMethodType,
-      card: paymentMethodDetails,
+      card: {
+        token: paymentMethodToken, // Use the test token provided by Stripe
+      },
     });
     res.json(paymentMethod);
   } catch (error) {
@@ -375,7 +377,7 @@ app.post("/api/create-payment-method", async (req, res) => {
 // Attach Payment Method to Customer API endpoint
 app.post("/api/attach-payment-method", async (req, res) => {
   const { paymentMethodId, customerId } = req.body;
-console.log("req.body==>",req.body)
+  console.log("req.body==>", req.body);
   try {
     await stripe.paymentMethods.attach(paymentMethodId, {
       customer: customerId,
