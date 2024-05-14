@@ -384,7 +384,7 @@ app.post("/api/attach-payment-method", async (req, res) => {
     await stripe.paymentMethods.attach(paymentMethodId, {
       customer: customerId,
     });
-    res.sendStatus(200);
+    res.sendStatus("attached payment method");
   } catch (error) {
     console.error("Error attaching payment method to customer:", error);
     res
