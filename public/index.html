@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Subscription Form</title>
 </head>
+
 <body>
     <form id="subscription-form">
         <input type="email" id="email" placeholder="Enter your email">
@@ -38,8 +40,8 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        paymentMethodType: 'card',
-                        paymentMethodDetails: {
+                        type: 'card',
+                        card: {
                             number: cardNumber,
                             exp_month: expiry.split('/')[0],
                             exp_year: expiry.split('/')[1],
@@ -82,4 +84,5 @@
         });
     </script>
 </body>
+
 </html>
