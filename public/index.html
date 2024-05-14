@@ -10,76 +10,98 @@
 <body>
     <form id="subscription-form">
         <input type="email" id="email" placeholder="Enter your email">
-        <input type="text" id="card-number" placeholder="Card Number">
-        <input type="text" id="expiry" placeholder="Expiry (MM/YY)">
-        <input type="text" id="cvc" placeholder="CVC">
+        <div id="card-element"></div>
         <button type="submit">Subscribe</button>
     </form>
 
-    <script>
+     <script>
+        // Initialize Stripe.js with your publishable key
+        const stripe = Stripe('pk_test_51OoJ9LSASGjb3zqkIbuCwoFz3qsrXCzRHLaIQTwAlP2wf4axwKqsgRQzwBTOCpBcKd2Sidj5ZvQayJa7zp8kSLqu009pC4GBd2');
+        
+        // Create an instance of Elements
+        const elements = stripe.elements();
+        
+        // Create a Card Element and mount it to the card-element div
+        const cardElement = elements.create('card');
+        cardElement.mount('#card-element');
+        
+        // Handle form submission
         document.getElementById('subscription-form').addEventListener('submit', async (event) => {
             event.preventDefault();
             const email = document.getElementById('email').value;
-            const cardNumber = document.getElementById('card-number').value;
-            const expiry = document.getElementById('expiry').value;
-            const cvc = document.getElementById('cvc').value;
-
+            
+            // Create a payment method using the card element
+            const { paymentMethod, error } = await stripe.createPaymentMethod({
+                type: 'card',
+                card: cardElement,
+            });
+            
+            if (error) {
+                console.error('Error:', error);
+                return;
+            }
+            
+            // Send the payment method ID to your server
             try {
-                const customerResponse = await fetch('/api/create-customer', {
+                const response = await fetch('/api/create-customer', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ email: email })
+                    body: JSON.stringify({ email: email }),
                 });
-                const customer = await customerResponse.json();
-
-                const paymentMethodResponse = await fetch('/api/create-payment-method', {
+                const customerData = await response.json();
+                console.log('Customer created:', customerData);
+                
+                // Attach the payment method to the customer
+                const attachResponse = await fetch('/api/attach-payment-method', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        type: 'card',
-                        card: {
-                            number: cardNumber,
-                            exp_month: expiry.split('/')[0],
-                            exp_year: expiry.split('/')[1],
-                            cvc: cvc
-                        }
-                    })
-                });
-                const paymentMethod = await paymentMethodResponse.json();
-
-                await fetch('/api/attach-payment-method', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
                         paymentMethodId: paymentMethod.id,
-                        customerId: customer.id
-                    })
+                        customerId: customerData.id,
+                    }),
                 });
-
+                const attachData = await attachResponse.json();
+                console.log('Payment method attached to customer:', attachData);
+                
+                // Create a payment method on your server
+                const createPaymentMethodResponse = await fetch('/api/create-payment-method', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        paymentMethodType: paymentMethod.type,
+                        paymentMethodToken: paymentMethod.id,
+                    }),
+                });
+                const paymentMethodData = await createPaymentMethodResponse.json();
+                console.log('Payment method created:', paymentMethodData);
+                
+                // Handle subscription creation or redirect to success page
                 const sessionResponse = await fetch('/api/create-checkout-session', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        customerId: customer.id,
+                        customerId: customerData.id,
                         priceId: 'price_1PE3CfSASGjb3zqkjpRKQVkc',
-                        successUrl: 'https://stripe-2.onrender.com/success.html',
-                        cancelUrl: 'https://stripe-2.onrender.com/cancel.html'
-                    })
+                        successUrl: 'https://yourwebsite.com/success.html',
+                        cancelUrl: 'https://yourwebsite.com/cancel.html',
+                    }),
                 });
-                const session = await sessionResponse.json();
-
+                const sessionData = await sessionResponse.json();
+                console.log('Checkout session created:', sessionData);
+                
                 // Redirect the user to the checkout page
-                window.location.href = session.url;
+                window.location.href = sessionData.url;
+                // This step depends on your application flow
             } catch (error) {
-                console.error('Subscription error:', error);
+                console.error('Error creating customer, attaching payment method, or creating payment method:', error);
             }
         });
     </script>
