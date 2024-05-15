@@ -385,11 +385,11 @@ app.post("/api/attach-payment-method", async (req, res) => {
       customer: customerId,
     });
 
-    await stripe.customers.update(customerId, {
-      invoice_settings: {
-        default_payment_method: paymentMethodId,
-      },
-    });
+    // await stripe.customers.update(customerId, {
+    //   invoice_settings: {
+    //     default_payment_method: paymentMethodId,
+    //   },
+    // });
     // console.log(nas)
     res.json({"success":"successfully"});
   } catch (error) {
