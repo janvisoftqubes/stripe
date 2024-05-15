@@ -384,7 +384,7 @@ app.post("/api/attach-payment-method", async (req, res) => {
     const abc = await stripe.paymentMethods.attach(paymentMethodId, {
       customer: customerId,
     });
-    console.log(" stripe.paymentMethods.attach:---",abc);
+    console.log(" stripe.paymentMethods.attach:---", abc);
     // await stripe.customers.update(customerId, {
     //   invoice_settings: {
     //     default_payment_method: paymentMethodId,
@@ -426,19 +426,28 @@ app.post("/api/create-checkout-session", async (req, res) => {
     const hasPaymentMethod =
       customer.invoice_settings.default_payment_method !== null;
 
-      const paymentMethods = await stripe.customers.listPaymentMethods(
-        customerId,
-        {
-          limit: 3,
-        }
-      );
-      console.log("customer---->",customer)
-      console.log("-----------------------***************  ******")
+    const paymentMethods = await stripe.customers.listPaymentMethods(
+      customerId,
+      {
+        limit: 3,
+      }
+    );
+    console.log("customer---->", customer);
 
-      console.log("paymentMethods---->",paymentMethods)
+    if (customer.data.length > 0) {
+      const subscription = await stripe.subscriptions.create({
+        customer: customerId,
+        items: [{ price: priceId }],
+        default_payment_method: paymentMethodId,
+      });
 
+      console.log("subscription without session--->", subscription);
+    }
+    console.log("-----------------------***************  ******");
 
-      console.log("-----------------------***************  ******")
+    console.log("paymentMethods---->", paymentMethods);
+
+    console.log("-----------------------***************  ******");
     if (hasPaymentMethod) {
       // If the customer has a payment method attached, create a subscription
       const subscription = await stripe.subscriptions.create({
