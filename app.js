@@ -433,8 +433,12 @@ app.post("/api/create-checkout-session", async (req, res) => {
         }
       );
       console.log("customer---->",customer)
+      console.log("-----------------------***************  ******")
 
       console.log("paymentMethods---->",paymentMethods)
+
+
+      console.log("-----------------------***************  ******")
     if (hasPaymentMethod) {
       // If the customer has a payment method attached, create a subscription
       const subscription = await stripe.subscriptions.create({
