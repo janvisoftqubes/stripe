@@ -359,7 +359,7 @@ app.post("/api/create-customer", async (req, res) => {
 // Create Payment Method API endpoint
 app.post("/api/create-payment-method", async (req, res) => {
   const { paymentMethodType, paymentMethodToken } = req.body;
-console.log(req.body)
+  console.log(req.body);
   try {
     const paymentMethod = await stripe.paymentMethods.create({
       type: paymentMethodType,
@@ -368,7 +368,7 @@ console.log(req.body)
       },
     });
 
-    console.log("paymentMethod-->",paymentMethod)
+    console.log("paymentMethod-->", paymentMethod);
     res.json(paymentMethod);
   } catch (error) {
     console.log("Error creating payment method:", error);
@@ -381,17 +381,17 @@ app.post("/api/attach-payment-method", async (req, res) => {
   const { paymentMethodId, customerId } = req.body;
   console.log("req.body==>", req.body);
   try {
-   await stripe.paymentMethods.attach(paymentMethodId, {
+    const abc = await stripe.paymentMethods.attach(paymentMethodId, {
       customer: customerId,
     });
-
+    console.log(abc);
     // await stripe.customers.update(customerId, {
     //   invoice_settings: {
     //     default_payment_method: paymentMethodId,
     //   },
     // });
     // console.log(nas)
-    res.json({"success":"successfully"});
+    res.json({ success: "successfully" });
   } catch (error) {
     console.error("Error attaching payment method to customer:", error);
     res
