@@ -434,7 +434,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
     );
     console.log("customer---->", customer);
 
-    if (customer.data.length > 0) {
+    if (paymentMethods.data.length > 0) {
       const subscription = await stripe.subscriptions.create({
         customer: customerId,
         items: [{ price: priceId }],
