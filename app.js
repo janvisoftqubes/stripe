@@ -384,7 +384,7 @@ app.post("/api/attach-payment-method", async (req, res) => {
     const abc = await stripe.paymentMethods.attach(paymentMethodId, {
       customer: customerId,
     });
-    console.log(abc);
+    console.log(" stripe.paymentMethods.attach:---",abc);
     // await stripe.customers.update(customerId, {
     //   invoice_settings: {
     //     default_payment_method: paymentMethodId,
