@@ -107,12 +107,12 @@
             const sessionData = await sessionResponse.json();
             console.log("Checkout session created:", sessionData);
 
-            if (responseData.session) {
+            if (sessionData.session) {
               // Redirect the user to the checkout page
-              window.location.href = responseData.session.url;
-            } else if (responseData.subscription) {
+              window.location.href = sessionData.session.url;
+            } else if (sessionData.subscription) {
               // Handle subscription data
-              console.log("Subscription created:", responseData.subscription);
+              console.log("Subscription created:", sessionData.subscription);
               // You can perform any additional actions here based on the subscription data
             }
             // This step depends on your application flow
