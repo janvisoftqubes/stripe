@@ -70,6 +70,9 @@
                 customerId: customerData.id,
               }),
             });
+
+            //-->
+
             // console.log(attachResponse.json())
             // const attachData = await attachResponse.json();
             // console.log('Payment method attached to customer:', attachData);
@@ -107,15 +110,63 @@
             const sessionData = await sessionResponse.json();
             console.log("Checkout session created:", sessionData);
 
-            if (sessionData.session) {
-              // Redirect the user to the checkout page
+            if (
+              sessionData.paymentIntent &&
+              sessionData.paymentIntent.status === "requires_action"
+            ) {
+              const result = await stripe.confirmCardPayment(
+                sessionData.paymentIntent.client_secret,
+                {
+                  payment_method: paymentMethod.id,
+                }
+              );
+              if (result.error) {
+                console.error(result.error);
+                return;
+              }
+              // The card action has been handled, you can now redirect or perform other actions
+              console.log("Card action successful:", result.paymentIntent);
+            } else if (sessionData.session) {
+              // Redirect the user to the checkout page if no further action is required
               window.location.href = sessionData.session.url;
-            } else if (sessionData.subscription) {
-              // Handle subscription data
-              console.log("Subscription created:", sessionData.subscription);
-              // You can perform any additional actions here based on the subscription data
             }
             // This step depends on your application flow
+
+            const createPaymentIntentResponse = await fetch(
+              "/api/create-payment-intent",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  paymentMethodId: paymentMethod.id,
+                  customerId: customerData.id,
+                  priceId: "price_1PE3CfSASGjb3zqkjpRKQVkc",
+                }),
+              }
+            );
+            const paymentIntentData = await createPaymentIntentResponse.json();
+            console.log("Payment intent created:", paymentIntentData);
+
+            // Confirm the payment intent with Stripe
+            const {
+              paymentIntent: confirmedPaymentIntent,
+              error: confirmationError,
+            } = await stripe.confirmCardPayment(
+              paymentIntentData.clientSecret,
+              {
+                payment_method: paymentMethod.id,
+              }
+            );
+
+            if (confirmationError) {
+              console.log("Error confirming payment:", confirmationError);
+              return;
+            }
+
+            console.log("Payment confirmed:", confirmedPaymentIntent);
+            // Handle the success or failure of the payment as needed
           } catch (error) {
             console.log(error);
             // console.error( error);

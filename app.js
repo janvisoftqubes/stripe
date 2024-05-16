@@ -320,14 +320,25 @@ app.post(
 
     // Handle the event
     switch (event.type) {
-      case 'payment_intent.requires_action':
+      case "payment_intent.requires_action":
         // Handle payment intent requiring action
-        console.log('PaymentIntent requires action:', event.data.object);
+        console.log("PaymentIntent requires action:", event.data.object);
         // You can notify the customer, retrieve updated payment information, etc.
         break;
       case "payment_intent.succeeded":
-        // Handle successful payment intent
-        console.log("Payment intent succeeded:", event.data.object);
+        // Retrieve the subscription associated with the Payment Intent
+        const subscriptionId = event.data.object.subscription;
+        const subscription = await stripe.subscriptions.retrieve(
+          subscriptionId
+        );
+
+        // Complete the subscription by updating its status or taking any necessary actions
+        // For example, you can update the subscription status to "active"
+        await stripe.subscriptions.update(subscriptionId, {
+          status: "active",
+        });
+
+        console.log("Subscription completed:", subscription);
         break;
       case "invoice.payment_succeeded":
         // Handle successful invoice payment
@@ -444,7 +455,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
       customer: customerId,
       status: "active",
     });
-
+    console.log("customer-->", customer);
     if (subscriptions.data.length > 0) {
       // Customer has an active subscription
       const subscription = await stripe.subscriptions.create({
@@ -452,11 +463,19 @@ app.post("/api/create-checkout-session", async (req, res) => {
         items: [{ price: priceId }],
         default_payment_method:
           customer.invoice_settings.default_payment_method,
+        expand: ["latest_invoice.payment_intent"],
       });
 
+      console.log("subscription-->", subscription);
 
-      console.log("subscription---->",subscription)
-      res.json({ subscription: subscription });
+      const paymentIntent = subscription.latest_invoice.payment_intent;
+      if (paymentIntent && paymentIntent.status === "requires_action") {
+        // Payment requires additional actions, handle it as needed
+        res.json({ paymentIntent: paymentIntent });
+      } else {
+        // Payment intent does not require action, subscription is created successfully
+        res.json({ subscription: subscription });
+      }
     } else {
       const session = await stripe.checkout.sessions.create({
         customer: customerId,
@@ -476,6 +495,32 @@ app.post("/api/create-checkout-session", async (req, res) => {
   } catch (error) {
     console.error("Error creating checkout session:", error);
     res.status(500).json({ error: "Failed to create checkout session" });
+  }
+});
+
+app.post("/api/create-payment-intent", async (req, res) => {
+  const { customerId, priceId } = req.body;
+
+  try {
+    const customer = await stripe.customers.retrieve(customerId);
+
+    // Create a Payment Intent for the subscription
+    const paymentIntent = await stripe.paymentIntents.create({
+      customer: customerId,
+      currency: "usd",
+      payment_method_types: ["card"],
+      description: "Payment for subscription",
+      confirm: true,
+      setup_future_usage: "off_session",
+      payment_method: customer.invoice_settings.default_payment_method,
+      price: priceId, // Use priceId instead of price
+    });
+
+    console.log("Payment intent created:", paymentIntent);
+    res.json({ clientSecret: paymentIntent.client_secret });
+  } catch (error) {
+    console.error("Error creating payment intent:", error);
+    res.status(500).json({ error: "Failed to create payment intent" });
   }
 });
 
