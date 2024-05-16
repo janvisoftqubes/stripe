@@ -146,26 +146,68 @@
                 }),
               }
             );
+
             const paymentIntentData = await createPaymentIntentResponse.json();
             console.log("Payment intent created:", paymentIntentData);
 
-            // Confirm the payment intent with Stripe
-            const {
-              paymentIntent: confirmedPaymentIntent,
-              error: confirmationError,
-            } = await stripe.confirmCardPayment(
-              paymentIntentData.clientSecret,
-              {
-                payment_method: paymentMethod.id,
+            // Check if the payment intent creation was successful
+            if (paymentIntentData.clientSecret) {
+              // Use the client secret to confirm the payment intent
+              const result = await stripe.confirmCardPayment(
+                paymentIntentData.clientSecret,
+                {
+                  payment_method: paymentMethod.id,
+                }
+              );
+
+              if (result.error) {
+                console.error(result.error);
+                return;
               }
-            );
 
-            if (confirmationError) {
-              console.log("Error confirming payment:", confirmationError);
-              return;
+              // Handle the result of confirming the payment intent
+              console.log("Payment intent confirmed:", result.paymentIntent);
+            } else {
+              // Handle error if the client secret is not provided in the response
+              console.error(
+                "Error creating payment intent:",
+                paymentIntentData.error
+              );
             }
+            // const createPaymentIntentResponse = await fetch(
+            //   "/api/create-payment-intent",
+            //   {
+            //     method: "POST",
+            //     headers: {
+            //       "Content-Type": "application/json",
+            //     },
+            //     body: JSON.stringify({
+            //       paymentMethodId: paymentMethod.id,
+            //       customerId: customerData.id,
+            //       priceId: "price_1PE3CfSASGjb3zqkjpRKQVkc",
+            //     }),
+            //   }
+            // );
+            // const paymentIntentData = await createPaymentIntentResponse.json();
+            // console.log("Payment intent created:", paymentIntentData);
 
-            console.log("Payment confirmed:", confirmedPaymentIntent);
+            // // Confirm the payment intent with Stripe
+            // const {
+            //   paymentIntent: confirmedPaymentIntent,
+            //   error: confirmationError,
+            // } = await stripe.confirmCardPayment(
+            //   paymentIntentData.clientSecret,
+            //   {
+            //     payment_method: paymentMethod.id,
+            //   }
+            // );
+
+            // if (confirmationError) {
+            //   console.log("Error confirming payment:", confirmationError);
+            //   return;
+            // }
+
+            // console.log("Payment confirmed:", confirmedPaymentIntent);
             // Handle the success or failure of the payment as needed
           } catch (error) {
             console.log(error);

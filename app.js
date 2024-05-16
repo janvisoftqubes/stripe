@@ -326,7 +326,10 @@ app.post(
         // You can notify the customer, retrieve updated payment information, etc.
         break;
       case "payment_intent.succeeded":
-        console.log("event.data.object.subscription:",event.data.object.subscription)
+        console.log(
+          "event.data.object.subscription:",
+          event.data.object.subscription
+        );
 
         // Retrieve the subscription associated with the Payment Intent
         const subscriptionId = event.data.object.subscription;
@@ -348,6 +351,10 @@ app.post(
         break;
       case "checkout.session.completed":
         // Handle completed checkout session
+        console.log("Checkout session completed:", event.data.object);
+        break;
+
+      case "customer.subscription.created":
         console.log("Checkout session completed:", event.data.object);
         break;
       default:
@@ -501,25 +508,35 @@ app.post("/api/create-checkout-session", async (req, res) => {
 });
 
 app.post("/api/create-payment-intent", async (req, res) => {
-  const { customerId, priceId } = req.body;
+  const { paymentMethodId, customerId, priceId } = req.body;
 
   try {
     const customer = await stripe.customers.retrieve(customerId);
 
     // Create a Payment Intent for the subscription
     const paymentIntent = await stripe.paymentIntents.create({
-      customer: customerId,
+      amount: 1000, // Specify the amount in cents
       currency: "usd",
-      payment_method_types: ["card"],
-      description: "Payment for subscription",
+      payment_method: paymentMethodId,
+      customer: customerId,
       confirm: true,
       setup_future_usage: "off_session",
-      payment_method: customer.invoice_settings.default_payment_method,
-      price: priceId, // Use priceId instead of price
+      description: "Payment for subscription",
+      payment_method_types: ["card"],
+      metadata: {
+        priceId: priceId,
+      },
     });
-
     console.log("Payment intent created:", paymentIntent);
-    res.json({ clientSecret: paymentIntent.client_secret });
+
+    const confirmedPaymentIntent = await stripe.paymentIntents.confirm(
+      paymentIntent.id
+    );
+
+    console.log("confirmedPaymentIntent-->", confirmedPaymentIntent);
+
+    // If the payment intent is successfully confirmed, send the client secret to the client
+    res.json({ clientSecret: confirmedPaymentIntent.client_secret });
   } catch (error) {
     console.error("Error creating payment intent:", error);
     res.status(500).json({ error: "Failed to create payment intent" });
