@@ -326,6 +326,8 @@ app.post(
         // You can notify the customer, retrieve updated payment information, etc.
         break;
       case "payment_intent.succeeded":
+        console.log("event.data.object.subscription:",event.data.object.subscription)
+
         // Retrieve the subscription associated with the Payment Intent
         const subscriptionId = event.data.object.subscription;
         const subscription = await stripe.subscriptions.retrieve(
