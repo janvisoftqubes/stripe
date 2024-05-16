@@ -357,6 +357,11 @@ app.post(
       case "customer.subscription.created":
         console.log("Checkout session completed:", event.data.object);
         break;
+      case "payment_intent.requires_payment_method":
+        // Handle situation where payment method needs to be updated
+        console.log("Payment method requires update");
+        // Inform the customer and prompt them to provide a new payment method
+        break;
       default:
         // Unexpected event type
         console.log(`Unhandled event type ${event.type}`);
