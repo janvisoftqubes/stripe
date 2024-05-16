@@ -320,6 +320,11 @@ app.post(
 
     // Handle the event
     switch (event.type) {
+      case 'payment_intent.requires_action':
+        // Handle payment intent requiring action
+        console.log('PaymentIntent requires action:', event.data.object);
+        // You can notify the customer, retrieve updated payment information, etc.
+        break;
       case "payment_intent.succeeded":
         // Handle successful payment intent
         console.log("Payment intent succeeded:", event.data.object);
@@ -346,10 +351,22 @@ app.post("/api/create-customer", async (req, res) => {
   const { email } = req.body;
 
   try {
-    const customer = await stripe.customers.create({
+    // Check if customer already exists
+    let customer = await stripe.customers.list({
       email: email,
+      limit: 1,
     });
-    res.json(customer);
+
+    if (customer && customer.data.length > 0) {
+      // Customer already exists, return existing customer
+      res.json(customer.data[0]);
+    } else {
+      // Create a new customer
+      customer = await stripe.customers.create({
+        email: email,
+      });
+      res.json(customer);
+    }
   } catch (error) {
     console.error("Error creating customer:", error);
     res.status(500).json({ error: "Failed to create customer" });
@@ -385,12 +402,12 @@ app.post("/api/attach-payment-method", async (req, res) => {
       customer: customerId,
     });
     console.log(" stripe.paymentMethods.attach:---", abc);
-    // await stripe.customers.update(customerId, {
-    //   invoice_settings: {
-    //     default_payment_method: paymentMethodId,
-    //   },
-    // });
-    // console.log(nas)
+    const def = await stripe.customers.update(customerId, {
+      invoice_settings: {
+        default_payment_method: paymentMethodId,
+      },
+    });
+    console.log("stripe.customers.update-->", def);
     res.json({ success: "successfully" });
   } catch (error) {
     console.error("Error attaching payment method to customer:", error);
@@ -423,40 +440,23 @@ app.post("/api/create-checkout-session", async (req, res) => {
 
   try {
     const customer = await stripe.customers.retrieve(customerId);
-    const hasPaymentMethod =
-      customer.invoice_settings.default_payment_method !== null;
+    const subscriptions = await stripe.subscriptions.list({
+      customer: customerId,
+      status: "active",
+    });
 
-    const paymentMethods = await stripe.customers.listPaymentMethods(
-      customerId,
-      {
-        limit: 3,
-      }
-    );
-    console.log("customer---->", customer);
-
-    if (paymentMethods.data.length > 0) {
-      const subscription = await stripe.subscriptions.create({
-        customer: customerId,
-        items: [{ price: priceId }],
-        default_payment_method: paymentMethodId,
-      });
-
-      console.log("subscription without session--->", subscription);
-    }
-    console.log("-----------------------***************  ******");
-
-    console.log("paymentMethods---->", paymentMethods);
-
-    console.log("-----------------------***************  ******");
-    if (hasPaymentMethod) {
-      // If the customer has a payment method attached, create a subscription
+    if (subscriptions.data.length > 0) {
+      // Customer has an active subscription
       const subscription = await stripe.subscriptions.create({
         customer: customerId,
         items: [{ price: priceId }],
         default_payment_method:
           customer.invoice_settings.default_payment_method,
       });
-      res.json(subscription);
+
+
+      console.log("subscription---->",subscription)
+      res.json({ subscription: subscription });
     } else {
       const session = await stripe.checkout.sessions.create({
         customer: customerId,
@@ -471,7 +471,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
         success_url: successUrl,
         cancel_url: cancelUrl,
       });
-      res.json(session);
+      res.json({ session: session });
     }
   } catch (error) {
     console.error("Error creating checkout session:", error);
