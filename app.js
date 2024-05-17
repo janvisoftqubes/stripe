@@ -519,29 +519,29 @@ app.post("/api/create-payment-intent", async (req, res) => {
     const customer = await stripe.customers.retrieve(customerId);
 
     // Create a Payment Intent for the subscription
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: 1000, // Specify the amount in cents
-      currency: "usd",
-      payment_method: paymentMethodId,
-      customer: customerId,
-      confirm: true,
-      setup_future_usage: "off_session",
-      description: "Payment for subscription",
-      payment_method_types: ["card"],
-      metadata: {
-        priceId: priceId,
-      },
-    });
-    console.log("Payment intent created:", paymentIntent);
+    // const paymentIntent = await stripe.paymentIntents.create({
+    //   amount: 1000, // Specify the amount in cents
+    //   currency: "usd",
+    //   payment_method: paymentMethodId,
+    //   customer: customerId,
+    //   confirm: true,
+    //   setup_future_usage: "off_session",
+    //   description: "Payment for subscription",
+    //   payment_method_types: ["card"],
+    //   metadata: {
+    //     priceId: priceId,
+    //   },
+    // });
+    // console.log("Payment intent created:", paymentIntent);
 
-    const confirmedPaymentIntent = await stripe.paymentIntents.confirm(
-      paymentIntent.id
-    );
+    // const confirmedPaymentIntent = await stripe.paymentIntents.confirm(
+    //   paymentIntent.id
+    // );
 
-    console.log("confirmedPaymentIntent-->", confirmedPaymentIntent);
+    // console.log("confirmedPaymentIntent-->", confirmedPaymentIntent);
 
     // If the payment intent is successfully confirmed, send the client secret to the client
-    res.json({ clientSecret: confirmedPaymentIntent.client_secret });
+    res.json({ paymentIntent: "---" });
   } catch (error) {
     console.error("Error creating payment intent:", error);
     res.status(500).json({ error: "Failed to create payment intent" });
