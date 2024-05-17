@@ -144,23 +144,23 @@
           }
           // This step depends on your application flow
 
-          const createPaymentIntentResponse = await fetch(
-            "/api/create-payment-intent",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                paymentMethodId: paymentMethod.id,
-                customerId: customerData.id,
-                priceId: "price_1PE3CfSASGjb3zqkjpRKQVkc",
-              }),
-            }
-          );
+          // const createPaymentIntentResponse = await fetch(
+          //   "/api/create-payment-intent",
+          //   {
+          //     method: "POST",
+          //     headers: {
+          //       "Content-Type": "application/json",
+          //     },
+          //     body: JSON.stringify({
+          //       paymentMethodId: paymentMethod.id,
+          //       customerId: customerData.id,
+          //       priceId: "price_1PE3CfSASGjb3zqkjpRKQVkc",
+          //     }),
+          //   }
+          // );
 
-          const paymentIntentData = await createPaymentIntentResponse.json();
-          console.log("Payment intent created:", paymentIntentData);
+          // const paymentIntentData = await createPaymentIntentResponse.json();
+          // console.log("Payment intent created:", paymentIntentData);
 
           // Check if the payment intent creation was successful
           // if (paymentIntentData.clientSecret) {
