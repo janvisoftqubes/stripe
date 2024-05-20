@@ -331,6 +331,13 @@ app.post(
           event.data.object
         );
 
+
+        const paymentIntent = event.data.object;
+        const customerId = paymentIntent.customer;
+        const invoice = await stripe.invoices.retrieve(paymentIntent.invoice);
+        const invoiceUrl = invoice.hosted_invoice_url;
+        payments[customerId] = invoiceUrl;
+        console.log("PaymentIntent succeeded:", paymentIntent);
         // // Retrieve the subscription associated with the Payment Intent
         // const subscriptionId = event.data.object.subscription;
         // const subscription = await stripe.subscriptions.retrieve(
@@ -548,6 +555,18 @@ app.post("/api/create-payment-intent", async (req, res) => {
   } catch (error) {
     console.error("Error creating payment intent:", error);
     res.status(500).json({ error: "Failed to create payment intent" });
+  }
+});
+
+
+// Endpoint to check payment status
+app.get("/payment-status/:customerId", (req, res) => {
+  const { customerId } = req.params;
+  const invoiceUrl = payments[customerId];
+  if (invoiceUrl) {
+    res.json({ success: true, invoiceUrl });
+  } else {
+    res.json({ success: false });
   }
 });
 
