@@ -328,7 +328,7 @@ app.post(
       case "payment_intent.succeeded":
         console.log(
           "event.data.object.subscription:",
-          event.data.object.subscription
+          event.data.object
         );
 
         // Retrieve the subscription associated with the Payment Intent
