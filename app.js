@@ -338,6 +338,7 @@ app.post(
         const invoiceUrl = invoice.hosted_invoice_url;
         payments[customerId] = invoiceUrl;
         console.log("PaymentIntent succeeded:", paymentIntent);
+        console.log("payments-->",payments)
         // // Retrieve the subscription associated with the Payment Intent
         // const subscriptionId = event.data.object.subscription;
         // const subscription = await stripe.subscriptions.retrieve(
@@ -564,6 +565,7 @@ app.get("/payment-status/:customerId", (req, res) => {
   const { customerId } = req.params;
   const invoiceUrl = payments[customerId];
   if (invoiceUrl) {
+    console.log("invoiceUrl:-->",invoiceUrl)
     res.json({ success: true, invoiceUrl });
   } else {
     res.json({ success: false });

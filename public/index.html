@@ -230,6 +230,7 @@
         const interval = setInterval(async () => {
           const response = await fetch(`/payment-status/${customerId}`);
           const result = await response.json();
+          console.log("result:-->",result)
           if (result.success) {
             clearInterval(interval);
             window.location.href = `/invoice.html?invoiceUrl=${encodeURIComponent(
