@@ -331,19 +331,19 @@ app.post(
           event.data.object
         );
 
-        // Retrieve the subscription associated with the Payment Intent
-        const subscriptionId = event.data.object.subscription;
-        const subscription = await stripe.subscriptions.retrieve(
-          subscriptionId
-        );
+        // // Retrieve the subscription associated with the Payment Intent
+        // const subscriptionId = event.data.object.subscription;
+        // const subscription = await stripe.subscriptions.retrieve(
+        //   subscriptionId
+        // );
 
-        // Complete the subscription by updating its status or taking any necessary actions
-        // For example, you can update the subscription status to "active"
-        await stripe.subscriptions.update(subscriptionId, {
-          status: "active",
-        });
+        // // Complete the subscription by updating its status or taking any necessary actions
+        // // For example, you can update the subscription status to "active"
+        // await stripe.subscriptions.update(subscriptionId, {
+        //   status: "active",
+        // });
 
-        console.log("Subscription completed:", subscription);
+        // console.log("Subscription completed:", subscription);
         break;
       case "invoice.payment_succeeded":
         // Handle successful invoice payment
