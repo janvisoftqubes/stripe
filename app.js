@@ -357,6 +357,9 @@ app.post(
       case "customer.subscription.created":
         console.log("Checkout session completed:", event.data.object);
         break;
+      case "customer.subscription.updated":
+        console.log("Customer subscription updated:", event.data.object);
+        break;
       case "payment_intent.requires_payment_method":
         // Handle situation where payment method needs to be updated
         console.log("Payment method requires update");
