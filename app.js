@@ -297,7 +297,7 @@ app.use((req, res, next) => {
   }
   next();
 });
-
+let payments = {};
 // Endpoint to handle webhook events from Stripe
 app.post(
   "/webhook",
