@@ -412,7 +412,7 @@ app.post("/api/create-customer", async (req, res) => {
 // Create Payment Method API endpoint
 app.post("/api/create-payment-method", async (req, res) => {
   const { paymentMethodType, paymentMethodToken } = req.body;
-  console.log(req.body);
+  console.log("/api/create-payment-method::",req.body);
   try {
     const paymentMethod = await stripe.paymentMethods.create({
       type: paymentMethodType,
